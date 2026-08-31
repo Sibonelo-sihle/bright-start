@@ -1,0 +1,11 @@
+import React,{useState} from 'react';
+import { LockKeyhole } from 'lucide-react';
+import { BrandLogo } from '../../components/BrandLogo';
+import { inputClass, labelClass, primaryButton } from '../../components/admin/AdminUI';
+import { signIn } from '../../services/adminAuth';
+import type { AdminUser } from '../../types';
+export function AdminLoginPage({onSuccess}:{onSuccess:(user:AdminUser)=>void}){
+ const [email,setEmail]=useState('admin@brightstart.demo'),[password,setPassword]=useState('BrightStartDemo!'),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+ async function submit(e:React.FormEvent){e.preventDefault();setError('');setBusy(true);try{onSuccess(await signIn(email,password));}catch(err){setError(err instanceof Error?err.message:'Unable to sign in.');}finally{setBusy(false)}}
+ return <div className="flex min-h-screen items-center justify-center bg-[#F8F7F3] p-4"><div className="w-full max-w-md rounded-2xl border border-[#D9E2EC] bg-white p-7 shadow-lg sm:p-9"><BrandLogo size="sm" showTagline={false}/><div className="mt-8"><span className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-[#102A43] text-[#F4B942]"><LockKeyhole className="h-5 w-5"/></span><h1 className="text-2xl font-extrabold text-[#102A43]">Admin sign in</h1><p className="mt-1 text-sm text-[#627D98]">Development preview access only.</p></div><div className="my-5 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900"><strong>Mock authentication:</strong> this client-side guard is not production security. Demo credentials are prefilled.</div><form onSubmit={submit} className="space-y-4"><div><label className={labelClass}>Email</label><input required type="email" className={inputClass} value={email} onChange={e=>setEmail(e.target.value)}/></div><div><label className={labelClass}>Password</label><input required type="password" className={inputClass} value={password} onChange={e=>setPassword(e.target.value)}/></div>{error&&<p className="text-sm text-red-700">{error}</p>}<button disabled={busy} className={`${primaryButton} w-full`}>{busy?'Signing in…':'Sign In'}</button><button type="button" className="w-full text-center text-sm font-semibold text-[#2463A7]">Forgot Password</button></form></div></div>;
+}

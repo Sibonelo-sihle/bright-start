@@ -1,0 +1,6 @@
+{
+  "name": "Bright Start Edu Recruitment",
+  "description": "Bright Start Edu Recruitment connects qualified, trusted, and vetted education professionals with schools and educational institutions across Zimbabwe and the wider region.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
