@@ -63,6 +63,27 @@ const initialFormData: EducatorApplicationData = {
   accuracyDeclaration: false,
 };
 
+const normalizeDraftArray = (value: unknown, fallback: string[] = []): string[] => {
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === 'string');
+  if (typeof value === 'string' && value.trim()) return [value.trim()];
+  return fallback;
+};
+
+const restoreDraft = (saved: string): EducatorApplicationData => {
+  const draft = JSON.parse(saved) as Partial<EducatorApplicationData>;
+  return {
+    ...initialFormData,
+    ...draft,
+    preferredRoles: normalizeDraftArray(draft.preferredRoles),
+    preferredLocations: normalizeDraftArray(draft.preferredLocations),
+    employmentType: normalizeDraftArray(draft.employmentType, initialFormData.employmentType),
+    cvFileName: '',
+    cvFileSize: '',
+    qualificationsFileName: '',
+    certificatesFileName: '',
+  };
+};
+
 interface WizardProps {
   selectedJob?: {id:string;title:string;slug?:string};
   onSuccessNavigate?: () => void;
@@ -74,7 +95,7 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ selectedJob, 
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        return { ...JSON.parse(saved), cvFileName:'', cvFileSize:'', qualificationsFileName:'', certificatesFileName:'' };
+        return restoreDraft(saved);
       }
     } catch {
       // ignore
@@ -165,8 +186,7 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ selectedJob, 
     }
 
     if (step === 6) {
-      if (!formData.availableStartDate) errs.availableStartDate = 'Expected start availability is required';
-      if (formData.preferredRoles.length === 0) errs.preferredRoles = 'Select at least one preferred role';
+      if (!formData.availableStartDate.trim()) errs.availableStartDate = 'Expected start availability is required';
     }
 
     if (step === 7) {
@@ -175,6 +195,12 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ selectedJob, 
     }
 
     setErrors(errs);
+    const firstInvalidField = Object.keys(errs)[0];
+    if (firstInvalidField) {
+      requestAnimationFrame(() => {
+        document.querySelector<HTMLElement>(`[data-validation-field="${firstInvalidField}"]`)?.focus();
+      });
+    }
     return Object.keys(errs).length === 0;
   };
 
@@ -904,6 +930,10 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ selectedJob, 
                   Available Start Date <span className="text-[#B91C1C]">*</span>
                 </label>
                 <select
+                  id="educator-available-start-date"
+                  data-validation-field="availableStartDate"
+                  aria-invalid={!!errors.availableStartDate}
+                  aria-describedby={errors.availableStartDate ? 'educator-available-start-date-error' : undefined}
                   value={formData.availableStartDate}
                   onChange={(e) => updateField('availableStartDate', e.target.value)}
                   className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
@@ -913,7 +943,7 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ selectedJob, 
                   <option value="Next academic term">Next academic term</option>
                   <option value="Next academic school year (January)">Next academic school year (January)</option>
                 </select>
-                {errors.availableStartDate && <p className="text-xs text-[#B91C1C] mt-1">{errors.availableStartDate}</p>}
+                {errors.availableStartDate && <p id="educator-available-start-date-error" role="alert" className="text-xs text-[#B91C1C] mt-1">{errors.availableStartDate}</p>}
               </div>
 
               <div>
