@@ -9,7 +9,6 @@ import { RolesGrid } from '../components/RolesGrid';
 import { RecruitmentProcess } from '../components/RecruitmentProcess';
 import { SafeguardingSection } from '../components/SafeguardingSection';
 import { EducatorCTASection } from '../components/EducatorCTASection';
-import { TestimonialsPlaceholder } from '../components/TestimonialsPlaceholder';
 import { FinalCTA } from '../components/FinalCTA';
 
 interface HomePageProps {
@@ -90,18 +89,18 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 </div>
 
                 {/* Floating Badge 1: Vetted Educators */}
-                <div className="absolute -bottom-5 -left-4 sm:left-6 bg-white/95 backdrop-blur-md rounded-xl p-3.5 border border-[#D9E2EC] shadow-lg flex items-center gap-3">
+                <div className="absolute -bottom-5 left-2 sm:left-6 bg-white/95 backdrop-blur-md rounded-xl p-3 sm:p-3.5 border border-[#D9E2EC] shadow-lg flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-[#EBF4F0] text-[#3D8061] flex items-center justify-center shrink-0">
                     <CheckCircle2 className="w-5 h-5" />
                   </div>
                   <div className="text-left">
                     <div className="text-xs font-extrabold text-[#102A43]">Vetted & Safeguarded</div>
-                    <div className="text-[10px] text-[#627D98]">100% Credential Authentication</div>
+                    <div className="text-xs text-[#627D98]">Safeguarding-conscious screening</div>
                   </div>
                 </div>
 
                 {/* Floating Badge 2: Zimbabwe & Region */}
-                <div className="absolute -top-4 -right-3 bg-[#102A43] text-white rounded-xl py-2 px-3.5 border border-[#2463A7] shadow-md flex items-center gap-2">
+                <div className="absolute -top-4 right-2 hidden sm:flex bg-[#102A43] text-white rounded-xl py-2 px-3.5 border border-[#2463A7] shadow-md items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[#F4B942] animate-pulse" />
                   <span className="text-[11px] font-bold tracking-wide">Zimbabwe & Regional Markets</span>
                 </div>
@@ -195,10 +194,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       {/* 9. EDUCATOR CTA */}
       <EducatorCTASection onNavigate={onNavigate} />
 
-      {/* 10. TESTIMONIALS */}
-      <TestimonialsPlaceholder />
-
-      {/* 11. FINAL CTA */}
+      {/* 10. FINAL CTA */}
       <FinalCTA onNavigate={onNavigate} />
     </div>
   );

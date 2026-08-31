@@ -33,7 +33,8 @@ export const ContactPage: React.FC = () => {
   const validate = (): boolean => {
     const errs: Record<string, string> = {};
     if (!formData.fullName.trim()) errs.fullName = 'Full name is required';
-    if (!formData.email.trim() || !formData.email.includes('@')) errs.email = 'Valid email is required';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) errs.email = 'Enter a valid email address';
+    if (formData.phone && formData.phone.replace(/\D/g, '').length < 7) errs.phone = 'Enter a valid phone number';
     if (!formData.message.trim()) errs.message = 'Please enter your message';
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -133,7 +134,7 @@ export const ContactPage: React.FC = () => {
                     <span className="text-sm font-bold text-[#102A43] block mt-0.5">
                       {COMPANY_INFO.phone}
                     </span>
-                    <span className="text-xs text-[#627D98]">Available Mon – Fri, 08:00 – 17:00 CAT</span>
+                    <span className="text-xs text-[#627D98]">Use the enquiry form or official email while these channels are being verified.</span>
                   </div>
                 </div>
 
@@ -170,10 +171,10 @@ export const ContactPage: React.FC = () => {
                       <CheckCircle2 className="w-8 h-8" />
                     </div>
                     <h3 className="text-xl font-extrabold text-[#102A43]">
-                      Message Successfully Sent
+                      Message Preview Complete
                     </h3>
                     <p className="text-xs sm:text-sm text-[#627D98] max-w-md mx-auto leading-relaxed">
-                      Thank you, <strong className="text-[#102A43]">{formData.fullName}</strong>. Your enquiry has been routed to our recruitment consultants. We will be in touch shortly.
+                      Thank you, <strong className="text-[#102A43]">{formData.fullName}</strong>. This development preview has validated your message, but it has not been sent. Please email us directly for current assistance.
                     </p>
                     <button
                       onClick={() => {
@@ -194,6 +195,7 @@ export const ContactPage: React.FC = () => {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
+                    <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900" role="note"><strong>Development preview:</strong> this form does not send messages yet. Please use the email address shown on this page.</p>
                     <div className="border-b border-[#D9E2EC] pb-3 mb-4">
                       <h3 className="text-lg font-bold text-[#102A43]">Send us a message</h3>
                       <p className="text-xs text-[#627D98]">Fill in the details below and we will get back to you.</p>
@@ -223,53 +225,64 @@ export const ContactPage: React.FC = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1">
+                        <label htmlFor="contact-full-name" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1">
                           Full Name <span className="text-[#B91C1C]">*</span>
                         </label>
                         <input
+                          id="contact-full-name"
+                          aria-invalid={!!errors.fullName}
+                          aria-describedby={errors.fullName ? 'contact-full-name-error' : undefined}
                           type="text"
                           value={formData.fullName}
                           onChange={(e) => updateField('fullName', e.target.value)}
                           placeholder="e.g. Chipo Ndlovu"
                           className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-[#F8F7F3] border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
                         />
-                        {errors.fullName && <p className="text-xs text-[#B91C1C] mt-1">{errors.fullName}</p>}
+                        {errors.fullName && <p id="contact-full-name-error" className="text-xs text-[#B91C1C] mt-1">{errors.fullName}</p>}
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1">
+                        <label htmlFor="contact-email" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1">
                           Email Address <span className="text-[#B91C1C]">*</span>
                         </label>
                         <input
+                          id="contact-email"
+                          aria-invalid={!!errors.email}
+                          aria-describedby={errors.email ? 'contact-email-error' : undefined}
                           type="email"
                           value={formData.email}
                           onChange={(e) => updateField('email', e.target.value)}
                           placeholder="e.g. chipo@example.com"
                           className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-[#F8F7F3] border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
                         />
-                        {errors.email && <p className="text-xs text-[#B91C1C] mt-1">{errors.email}</p>}
+                        {errors.email && <p id="contact-email-error" className="text-xs text-[#B91C1C] mt-1">{errors.email}</p>}
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1">
+                        <label htmlFor="contact-phone" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1">
                           Phone / WhatsApp Number
                         </label>
                         <input
+                          id="contact-phone"
+                          aria-invalid={!!errors.phone}
+                          aria-describedby={errors.phone ? 'contact-phone-error' : undefined}
                           type="tel"
                           value={formData.phone}
                           onChange={(e) => updateField('phone', e.target.value)}
                           placeholder="e.g. +263 77 000 0000"
                           className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-[#F8F7F3] border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
                         />
+                        {errors.phone && <p id="contact-phone-error" className="mt-1 text-xs text-[#B91C1C]">{errors.phone}</p>}
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1">
+                        <label htmlFor="contact-subject" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1">
                           Subject
                         </label>
                         <input
+                          id="contact-subject"
                           type="text"
                           value={formData.subject}
                           onChange={(e) => updateField('subject', e.target.value)}
@@ -280,17 +293,20 @@ export const ContactPage: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1">
+                      <label htmlFor="contact-message" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1">
                         Your Message <span className="text-[#B91C1C]">*</span>
                       </label>
                       <textarea
+                        id="contact-message"
+                        aria-invalid={!!errors.message}
+                        aria-describedby={errors.message ? 'contact-message-error' : undefined}
                         rows={4}
                         value={formData.message}
                         onChange={(e) => updateField('message', e.target.value)}
                         placeholder="Tell us how we can help your school or career..."
                         className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-[#F8F7F3] border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
                       />
-                      {errors.message && <p className="text-xs text-[#B91C1C] mt-1">{errors.message}</p>}
+                      {errors.message && <p id="contact-message-error" className="text-xs text-[#B91C1C] mt-1">{errors.message}</p>}
                     </div>
 
                     <button

@@ -27,7 +27,7 @@ export const EducatorCTASection: React.FC<EducatorCTASectionProps> = ({ onNaviga
               </h2>
 
               <p className="mt-4 text-base sm:text-lg text-[#627D98] leading-relaxed">
-                Join our regional educator database to be matched with verified vacancies in progressive primary, secondary, and international syllabus institutions.
+                Prepare your profile for future opportunities across primary, secondary, and international syllabus institutions.
               </p>
 
               <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-[#1F2933]">

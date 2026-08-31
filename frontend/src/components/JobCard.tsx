@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { MapPin, Briefcase, Calendar, GraduationCap, ArrowRight, ShieldCheck, Check, Clock } from 'lucide-react';
-import { JobListing, PageRoute } from '../types';
+import { JobListing } from '../types';
 
 interface JobCardProps {
   job: JobListing;
@@ -31,11 +31,10 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onApply, onViewDetails })
         </div>
 
         {/* Job Title */}
-        <h3
-          onClick={() => onViewDetails(job)}
-          className="text-base sm:text-lg font-bold text-[#102A43] group-hover:text-[#2463A7] transition-colors cursor-pointer leading-snug"
-        >
-          {job.title}
+        <h3 className="leading-snug">
+          <button onClick={() => onViewDetails(job)} className="text-left text-base font-bold text-[#102A43] transition-colors hover:text-[#2463A7] focus-visible rounded sm:text-lg">
+            {job.title}
+          </button>
         </h3>
 
         {/* Employer & Location */}
@@ -99,14 +98,24 @@ interface JobDetailsModalProps {
 }
 
 export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose, onApply }) => {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!job) return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    dialogRef.current?.focus();
+    const handleKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => { document.removeEventListener('keydown', handleKeyDown); previousFocus?.focus(); };
+  }, [job, onClose]);
   if (!job) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-[#D9E2EC] relative max-h-[90vh] overflow-y-auto my-auto animate-in fade-in zoom-in-95 duration-200">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="job-dialog-title" tabIndex={-1} className="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-[#D9E2EC] relative max-h-[90vh] overflow-y-auto my-auto animate-in fade-in zoom-in-95 duration-200 focus:outline-none">
         {/* Close button */}
         <button
           onClick={onClose}
+          aria-label="Close job details"
           className="absolute top-5 right-5 w-8 h-8 rounded-full bg-[#EEF4F8] hover:bg-[#D9E2EC] text-[#1F2933] flex items-center justify-center text-sm font-bold transition-colors"
         >
           ✕
@@ -128,7 +137,7 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose, 
         </div>
 
         {/* Title */}
-        <h2 className="text-xl sm:text-2xl font-extrabold text-[#102A43] leading-tight">
+        <h2 id="job-dialog-title" className="text-xl sm:text-2xl font-extrabold text-[#102A43] leading-tight">
           {job.title}
         </h2>
 
@@ -146,6 +155,15 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose, 
             <Calendar className="w-3.5 h-3.5 text-[#627D98]" />
             <span>Posted: {job.postedDate}</span>
           </div>
+          <div className="flex items-center gap-1.5">
+            <Briefcase className="w-3.5 h-3.5 text-[#627D98]" />
+            <span>Employment: {job.roleType}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <GraduationCap className="w-3.5 h-3.5 text-[#627D98]" />
+            <span>Education level: {job.educationLevel}</span>
+          </div>
+          {job.department && <div className="flex items-center gap-1.5 sm:col-span-2"><GraduationCap className="w-3.5 h-3.5 text-[#627D98]" /><span>Subject / Department: {job.department}</span></div>}
           {job.deadline && (
             <div className="flex items-center gap-1.5 text-[#B91C1C] font-medium">
               <Clock className="w-3.5 h-3.5 text-[#B91C1C]" />

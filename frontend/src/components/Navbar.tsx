@@ -73,18 +73,14 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Brand Logo */}
-          <div
+          <button
+            type="button"
             onClick={() => handleLinkClick('home')}
-            className="cursor-pointer transition-opacity hover:opacity-90"
-            role="button"
-            tabIndex={0}
+            className="transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#2463A7]"
             aria-label="Bright Start Edu Recruitment Home"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') handleLinkClick('home');
-            }}
           >
             <BrandLogo size={isScrolled ? 'sm' : 'md'} showTagline={false} />
-          </div>
+          </button>
 
           {/* Desktop Center/Right Navigation Links */}
           <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
@@ -142,6 +138,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-lg bg-[#EEF4F8] text-[#102A43] hover:bg-[#D9E2EC] transition-colors focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
               aria-label="Toggle navigation menu"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -151,7 +149,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
 
       {/* Mobile Drawer Navigation */}
       {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-x-0 top-[60px] bg-white border-b border-[#D9E2EC] shadow-xl p-5 animate-in slide-in-from-top-2 duration-200 z-50 max-h-[85vh] overflow-y-auto">
+        <div id="mobile-navigation" className="lg:hidden absolute inset-x-0 top-full bg-white border-b border-[#D9E2EC] shadow-xl p-5 animate-in slide-in-from-top-2 duration-200 z-50 max-h-[calc(100vh-4rem)] overflow-y-auto">
           <div className="space-y-1 pb-4 border-b border-[#D9E2EC]">
             {navLinks.map((link) => {
               const isActive = currentPage === link.id;

@@ -1,20 +1,34 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Bright Start Edu Recruitment
 
-# Run and deploy your AI Studio app
+Bright Start Edu Recruitment is an education recruitment platform for schools and educators across Zimbabwe and the wider region. This repository currently contains the public website and a development-stage admin UI.
 
-This contains everything you need to run your app locally.
+## Repository structure
 
-View your app in AI Studio: https://ai.studio/apps/d8b8962c-55d7-4c4c-843f-629f01742822
+- `frontend/` — React/Vite public website and the existing `/admin` UI.
+- `backend/` — reserved for future server-side integrations and privileged operations.
+- `database/` — reserved for future database schema, migrations, and seed tooling.
+- `docs/` — architecture, setup, and deployment documentation.
 
-## Run Locally
+No backend or database integration is implemented yet. Public submissions and admin data remain development/demo flows.
 
-**Prerequisites:**  Node.js
+## Run the frontend
 
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Lint
+
+```bash
+cd frontend
+npm run lint
+```
+
+## Production build
+
+```bash
+cd frontend
+npm run build
+```

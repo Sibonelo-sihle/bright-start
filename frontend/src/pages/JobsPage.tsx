@@ -1,10 +1,10 @@
-import React, { useState, useMemo } from 'react';
-import { Search, Filter, Briefcase, MapPin, Sparkles, UserPlus, Info, CheckCircle2 } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Search, Filter, Briefcase, UserPlus, Info } from 'lucide-react';
 import { JobListing, PageRoute } from '../types';
 import { SAMPLE_JOBS } from '../data/constants';
 import { JobCard, JobDetailsModal } from '../components/JobCard';
-import { SectionHeading } from '../components/SectionHeading';
-import { EducatorApplicationWizard } from '../components/EducatorApplicationWizard';
+
+const jobSlug = (job: JobListing) => `${job.id}-${job.title}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
 interface JobsPageProps {
   onNavigate: (page: PageRoute) => void;
@@ -16,7 +16,19 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onApplyForJob })
   const [selectedRoleType, setSelectedRoleType] = useState('All');
   const [selectedLocation, setSelectedLocation] = useState('All');
   const [selectedEducationLevel, setSelectedEducationLevel] = useState('All');
-  const [activeModalJob, setActiveModalJob] = useState<JobListing | null>(null);
+  const [activeModalJob, setActiveModalJob] = useState<JobListing | null>(() => {
+    const slug = window.location.pathname.startsWith('/jobs/') ? window.location.pathname.slice(6) : '';
+    return SAMPLE_JOBS.find(job => jobSlug(job) === slug) || null;
+  });
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const slug = window.location.pathname.startsWith('/jobs/') ? window.location.pathname.slice(6) : '';
+      setActiveModalJob(SAMPLE_JOBS.find(job => jobSlug(job) === slug) || null);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const filteredJobs = useMemo(() => {
     return SAMPLE_JOBS.filter((job) => {
@@ -27,8 +39,13 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onApplyForJob })
         job.employer.toLowerCase().includes(searchQuery.toLowerCase()) ||
         job.requirements.some(r => r.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      const matchesRole =
-        selectedRoleType === 'All' || job.roleType.toLowerCase().includes(selectedRoleType.toLowerCase());
+      const categoryText = `${job.title} ${job.department || ''} ${job.educationLevel}`.toLowerCase();
+      const matchesRole = selectedRoleType === 'All' ||
+        (selectedRoleType === 'Teaching' && job.roleType !== 'Leadership') ||
+        (selectedRoleType === 'Early Childhood' && job.educationLevel === 'Early Childhood') ||
+        (selectedRoleType === 'STEM' && /(math|science|physics|chemistry|stem|technology)/.test(categoryText)) ||
+        (selectedRoleType === 'Leadership' && job.roleType === 'Leadership') ||
+        (selectedRoleType === 'Support' && /(support|sen|administrator|operations)/.test(categoryText));
 
       const matchesLocation =
         selectedLocation === 'All' || job.location.toLowerCase().includes(selectedLocation.toLowerCase());
@@ -42,6 +59,16 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onApplyForJob })
 
   const handleApplyClick = (job: JobListing) => {
     onApplyForJob(job.title);
+  };
+
+  const openJob = (job: JobListing) => {
+    setActiveModalJob(job);
+    window.history.pushState({}, '', `/jobs/${jobSlug(job)}`);
+  };
+
+  const closeJob = () => {
+    setActiveModalJob(null);
+    if (window.location.pathname !== '/jobs') window.history.pushState({}, '', '/jobs');
   };
 
   return (
@@ -58,7 +85,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onApplyForJob })
             Find Your Next Education Role.
           </h1>
           <p className="mt-3 text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Browse verified vacancies across primary schools, high schools, Cambridge syllabus colleges, and institutional leadership roles.
+            Preview the types of education roles Bright Start is preparing to support across schools and learning institutions.
           </p>
 
           {/* Search bar inside hero */}
@@ -66,6 +93,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onApplyForJob })
             <div className="relative flex-1 w-full">
               <Search className="w-4 h-4 text-[#627D98] absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
+                aria-label="Search vacancies"
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -81,12 +109,6 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onApplyForJob })
                 Clear
               </button>
             )}
-            <button
-              onClick={() => {}}
-              className="w-full sm:w-auto px-6 py-2.5 bg-[#102A43] hover:bg-[#1E3A56] text-white font-bold text-xs rounded-xl transition-colors shrink-0"
-            >
-              Filter Roles
-            </button>
           </div>
         </div>
       </section>
@@ -99,10 +121,10 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onApplyForJob })
             <Info className="w-4 h-4 text-[#2463A7] shrink-0 mt-0.5" />
             <div className="space-y-1">
               <span className="font-bold text-[#102A43] block">
-                Ethical Disclosure & Growing Vacancy Roster:
+                Demonstration Vacancy Board:
               </span>
               <p className="text-[#627D98] leading-relaxed">
-                As Bright Start builds partner mandates for the upcoming academic terms, sample vacancy profiles are displayed below alongside verified live requisitions. To be immediately matched as new school requisitions open, register your profile via our <strong>Educator Network Portal</strong>.
+                Every vacancy currently displayed below is a clearly labelled sample profile for website demonstration. No listing should be treated as a live vacancy until Bright Start publishes verified opportunities.
               </p>
             </div>
           </div>
@@ -147,6 +169,13 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onApplyForJob })
                   <option value="Regional">Regional / Boarding</option>
                 </select>
               </div>
+              <div className="flex items-center gap-2 text-xs">
+                <label htmlFor="education-level-filter" className="font-bold text-[#102A43]">Education level:</label>
+                <select id="education-level-filter" value={selectedEducationLevel} onChange={(e) => setSelectedEducationLevel(e.target.value)} className="rounded-lg border border-[#D9E2EC] bg-[#F8F7F3] px-2.5 py-1.5 text-xs text-[#1F2933] focus:ring-2 focus:ring-[#2463A7]">
+                  <option value="All">All Levels</option>
+                  {[...new Set(SAMPLE_JOBS.map(job => job.educationLevel))].map(level => <option key={level} value={level}>{level}</option>)}
+                </select>
+              </div>
             </div>
           </div>
 
@@ -158,7 +187,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onApplyForJob })
                   key={job.id}
                   job={job}
                   onApply={handleApplyClick}
-                  onViewDetails={(j) => setActiveModalJob(j)}
+                  onViewDetails={openJob}
                 />
               ))}
             </div>
@@ -210,7 +239,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onApplyForJob })
       {/* Modal Dialog */}
       <JobDetailsModal
         job={activeModalJob}
-        onClose={() => setActiveModalJob(null)}
+        onClose={closeJob}
         onApply={handleApplyClick}
       />
     </div>

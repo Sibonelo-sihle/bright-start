@@ -44,7 +44,7 @@ export const TermsPage: React.FC = () => {
             <section>
               <h2 className="text-base font-bold text-[#102A43] mb-2">4. Institutional Placement & Terms for Schools</h2>
               <p>
-                Educational institutions engaging Bright Start enter into tailored terms of engagement governing shortlist presentation, interview facilitation, placement guarantees, and fee schedules prior to candidate introduction.
+                Educational institutions engaging Bright Start enter into tailored terms governing shortlist presentation, interview facilitation, placement support, and fee schedules prior to candidate introduction.
               </p>
             </section>
 

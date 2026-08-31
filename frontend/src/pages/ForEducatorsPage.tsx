@@ -25,7 +25,7 @@ export const ForEducatorsPage: React.FC<ForEducatorsPageProps> = ({ onNavigate }
             Take your teaching career to the next level.
           </h1>
           <p className="mt-4 text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Register with Bright Start to access exclusive, verified teaching appointments and school leadership opportunities in top institutions.
+            Prepare your professional profile for future teaching and school leadership opportunities supported by Bright Start.
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">

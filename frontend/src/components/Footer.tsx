@@ -2,7 +2,7 @@ import React from 'react';
 import { BrandLogo } from './BrandLogo';
 import { PageRoute } from '../types';
 import { COMPANY_INFO } from '../data/constants';
-import { Mail, Phone, MapPin, Globe, Linkedin, Facebook, Twitter, ShieldCheck } from 'lucide-react';
+import { Mail, Phone, MapPin, Linkedin, Facebook, Twitter, ShieldCheck } from 'lucide-react';
 
 interface FooterProps {
   onNavigate: (page: PageRoute) => void;
@@ -44,30 +44,15 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             {/* Social Placeholders */}
             <div className="flex items-center gap-3 pt-2">
               <span className="text-xs text-slate-400">Connect:</span>
-              <a
-                href="#linkedin"
-                aria-label="LinkedIn"
-                onClick={(e) => e.preventDefault()}
-                className="w-8 h-8 rounded-lg bg-[#1E3A56] hover:bg-[#2463A7] text-slate-300 hover:text-white flex items-center justify-center transition-colors text-xs"
-              >
+              <span aria-label="LinkedIn profile not yet available" title="Profile coming soon" className="w-8 h-8 rounded-lg bg-[#1E3A56] text-slate-400 flex items-center justify-center text-xs">
                 <Linkedin className="w-4 h-4" />
-              </a>
-              <a
-                href="#facebook"
-                aria-label="Facebook"
-                onClick={(e) => e.preventDefault()}
-                className="w-8 h-8 rounded-lg bg-[#1E3A56] hover:bg-[#2463A7] text-slate-300 hover:text-white flex items-center justify-center transition-colors text-xs"
-              >
+              </span>
+              <span aria-label="Facebook profile not yet available" title="Profile coming soon" className="w-8 h-8 rounded-lg bg-[#1E3A56] text-slate-400 flex items-center justify-center text-xs">
                 <Facebook className="w-4 h-4" />
-              </a>
-              <a
-                href="#twitter"
-                aria-label="Twitter / X"
-                onClick={(e) => e.preventDefault()}
-                className="w-8 h-8 rounded-lg bg-[#1E3A56] hover:bg-[#2463A7] text-slate-300 hover:text-white flex items-center justify-center transition-colors text-xs"
-              >
+              </span>
+              <span aria-label="X profile not yet available" title="Profile coming soon" className="w-8 h-8 rounded-lg bg-[#1E3A56] text-slate-400 flex items-center justify-center text-xs">
                 <Twitter className="w-4 h-4" />
-              </a>
+              </span>
             </div>
           </div>
 

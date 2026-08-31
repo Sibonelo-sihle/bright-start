@@ -29,34 +29,34 @@ const initialFormData: EducatorApplicationData = {
   surname: '',
   email: '',
   phone: '',
-  currentLocation: 'Harare, Zimbabwe',
-  city: 'Harare',
+  currentLocation: '',
+  city: '',
   country: 'Zimbabwe',
   primaryRole: 'Primary School Teacher',
   yearsOfExperience: '3-5 years',
   educationLevel: 'Primary (Grades 1-7)',
-  subjects: 'Mathematics, Science, English',
+  subjects: '',
   currentEmploymentStatus: 'Employed, looking for next step',
   highestQualification: "Bachelor's Degree",
-  institution: 'University of Zimbabwe',
-  graduationYear: '2020',
+  institution: '',
+  graduationYear: '',
   teachingQualification: 'Diploma in Education / Grad CE',
   professionalRegistration: '',
-  currentEmployer: 'Local Preparatory Academy',
-  position: 'Primary Class Teacher',
-  startDate: 'Jan 2022',
-  endDate: 'Present',
-  responsibilities: 'Classroom teaching, termly syllabus tracking, lesson planning, pupil progress reporting.',
+  currentEmployer: '',
+  position: '',
+  startDate: '',
+  endDate: '',
+  responsibilities: '',
   previousExperience: '',
   cvFileName: '',
   cvFileSize: '',
   qualificationsFileName: '',
   certificatesFileName: '',
-  preferredRoles: ['Primary School Teacher', 'Subject Specialist'],
-  preferredLocations: ['Harare', 'Bulawayo'],
+  preferredRoles: [],
+  preferredLocations: [],
   availableStartDate: 'Next academic term',
   employmentType: ['Permanent', 'Full-Time'],
-  salaryExpectation: 'Negotiable based on package',
+  salaryExpectation: '',
   privacyConsent: false,
   communicationConsent: false,
   accuracyDeclaration: false,
@@ -84,7 +84,6 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
-  const [applicationRef, setApplicationRef] = useState<string>('');
 
   // Auto-save form changes locally
   useEffect(() => {
@@ -132,8 +131,8 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
     if (step === 1) {
       if (!formData.firstName.trim()) errs.firstName = 'First name is required';
       if (!formData.surname.trim()) errs.surname = 'Surname is required';
-      if (!formData.email.trim() || !formData.email.includes('@')) errs.email = 'Valid email address is required';
-      if (!formData.phone.trim()) errs.phone = 'Phone contact number is required';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) errs.email = 'Valid email address is required';
+      if (formData.phone.replace(/\D/g, '').length < 7) errs.phone = 'Valid phone contact number is required';
       if (!formData.currentLocation.trim()) errs.currentLocation = 'Current location is required';
     }
 
@@ -193,8 +192,6 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
 
     setIsSubmitting(true);
     setTimeout(() => {
-      const randomRef = `BSE-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
-      setApplicationRef(randomRef);
       setIsSubmitting(false);
       setIsSubmitted(true);
       try {
@@ -218,36 +215,26 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
         </div>
 
         <span className="px-3 py-1 rounded-full bg-[#FEF3D6] text-[#102A43] text-xs font-bold uppercase tracking-wider border border-[#F4B942]/40">
-          Application Successfully Received
+          Application Preview Complete
         </span>
 
         <h2 className="text-2xl sm:text-3xl font-extrabold text-[#102A43] mt-4 mb-2">
-          Welcome to the Bright Start Educator Network
+          Your application preview is ready
         </h2>
 
         <p className="text-sm text-[#627D98] max-w-lg mx-auto leading-relaxed">
-          Thank you, <strong className="text-[#102A43]">{formData.firstName} {formData.surname}</strong>. Your candidate registration and credentials have been securely registered with our education recruitment team.
+          Thank you, <strong className="text-[#102A43]">{formData.firstName} {formData.surname}</strong>. This development preview has validated your form, but no information or documents have been sent to Bright Start yet.
         </p>
 
-        {/* Reference Badge */}
-        <div className="my-6 p-4 bg-[#F8F7F3] rounded-xl border border-[#D9E2EC] max-w-md mx-auto text-left flex items-center justify-between">
-          <div>
-            <span className="text-[10px] uppercase font-bold text-[#627D98] block">Candidate Reference ID</span>
-            <span className="text-base font-black text-[#102A43] font-mono">{applicationRef}</span>
-          </div>
-          <span className="text-xs px-2.5 py-1 bg-[#3D8061] text-white font-bold rounded-md">
-            Profile Under Review
-          </span>
-        </div>
+        <p className="my-6 rounded-xl border border-[#D9E2EC] bg-[#F8F7F3] p-4 text-sm font-semibold text-[#102A43]">Online submission will be activated when the Bright Start application service goes live.</p>
 
         <div className="bg-[#EEF4F8] rounded-xl p-5 border border-[#D9E2EC] text-left text-xs text-[#1F2933] space-y-2 mb-8">
           <div className="font-bold text-[#102A43] text-sm flex items-center gap-1.5">
             <ShieldCheck className="w-4 h-4 text-[#3D8061]" />
-            Next Steps in Your Candidate Journey:
+            Before applications go live:
           </div>
-          <p>1. Our consultant will review your verified qualifications and CV experience.</p>
-          <p>2. We will contact you at <strong className="text-[#102A43]">{formData.email}</strong> or <strong className="text-[#102A43]">{formData.phone}</strong> for a brief screening conversation.</p>
-          <p>3. As relevant school vacancies matching your criteria arise, you will receive tailored opportunity briefings.</p>
+          <p>Submission delivery and secure document storage are still being prepared.</p>
+          <p>Please use the contact page if you need assistance in the meantime.</p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -340,6 +327,7 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
 
       {/* Main Wizard Form Body */}
       <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-6">
+        <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900" role="note"><strong>Development preview:</strong> form data and documents are not transmitted or stored.</p>
         {/* STEP 1: Personal Information */}
         {currentStep === 1 && (
           <div className="space-y-6 animate-in fade-in duration-200">
@@ -354,73 +342,78 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
+                <label htmlFor="educator-first-name" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
                   First Name <span className="text-[#B91C1C]">*</span>
                 </label>
                 <input
+                  id="educator-first-name" aria-invalid={!!errors.firstName} aria-describedby={errors.firstName ? 'educator-first-name-error' : undefined}
                   type="text"
                   value={formData.firstName}
                   onChange={(e) => updateField('firstName', e.target.value)}
                   placeholder="e.g. Tendai"
                   className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
                 />
-                {errors.firstName && <p className="text-xs text-[#B91C1C] mt-1">{errors.firstName}</p>}
+                {errors.firstName && <p id="educator-first-name-error" className="text-xs text-[#B91C1C] mt-1">{errors.firstName}</p>}
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
+                <label htmlFor="educator-surname" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
                   Surname <span className="text-[#B91C1C]">*</span>
                 </label>
                 <input
+                  id="educator-surname" aria-invalid={!!errors.surname} aria-describedby={errors.surname ? 'educator-surname-error' : undefined}
                   type="text"
                   value={formData.surname}
                   onChange={(e) => updateField('surname', e.target.value)}
                   placeholder="e.g. Moyo"
                   className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
                 />
-                {errors.surname && <p className="text-xs text-[#B91C1C] mt-1">{errors.surname}</p>}
+                {errors.surname && <p id="educator-surname-error" className="text-xs text-[#B91C1C] mt-1">{errors.surname}</p>}
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
+                <label htmlFor="educator-email" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
                   Email Address <span className="text-[#B91C1C]">*</span>
                 </label>
                 <input
+                  id="educator-email" aria-invalid={!!errors.email} aria-describedby={errors.email ? 'educator-email-error' : undefined}
                   type="email"
                   value={formData.email}
                   onChange={(e) => updateField('email', e.target.value)}
                   placeholder="e.g. tendai.moyo@example.com"
                   className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
                 />
-                {errors.email && <p className="text-xs text-[#B91C1C] mt-1">{errors.email}</p>}
+                {errors.email && <p id="educator-email-error" className="text-xs text-[#B91C1C] mt-1">{errors.email}</p>}
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
+                <label htmlFor="educator-phone" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
                   Phone / WhatsApp Contact <span className="text-[#B91C1C]">*</span>
                 </label>
                 <input
+                  id="educator-phone" aria-invalid={!!errors.phone} aria-describedby={errors.phone ? 'educator-phone-error' : undefined}
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => updateField('phone', e.target.value)}
                   placeholder="e.g. +263 77 123 4567"
                   className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
                 />
-                {errors.phone && <p className="text-xs text-[#B91C1C] mt-1">{errors.phone}</p>}
+                {errors.phone && <p id="educator-phone-error" className="text-xs text-[#B91C1C] mt-1">{errors.phone}</p>}
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
+                <label htmlFor="educator-location" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
                   Current Location / City <span className="text-[#B91C1C]">*</span>
                 </label>
                 <input
+                  id="educator-location" aria-invalid={!!errors.currentLocation} aria-describedby={errors.currentLocation ? 'educator-location-error' : undefined}
                   type="text"
                   value={formData.currentLocation}
                   onChange={(e) => updateField('currentLocation', e.target.value)}
                   placeholder="e.g. Harare, Zimbabwe / Bulawayo / Regional"
                   className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
                 />
-                {errors.currentLocation && <p className="text-xs text-[#B91C1C] mt-1">{errors.currentLocation}</p>}
+                {errors.currentLocation && <p id="educator-location-error" className="text-xs text-[#B91C1C] mt-1">{errors.currentLocation}</p>}
               </div>
             </div>
           </div>
@@ -440,10 +433,10 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
+                <label htmlFor="educator-primary-role" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
                   Primary Role Category <span className="text-[#B91C1C]">*</span>
                 </label>
-                <select
+                <select id="educator-primary-role" aria-invalid={!!errors.primaryRole}
                   value={formData.primaryRole}
                   onChange={(e) => updateField('primaryRole', e.target.value)}
                   className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
@@ -464,10 +457,10 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
+                <label htmlFor="educator-years-experience" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
                   Years of Teaching / Experience <span className="text-[#B91C1C]">*</span>
                 </label>
-                <select
+                <select id="educator-years-experience"
                   value={formData.yearsOfExperience}
                   onChange={(e) => updateField('yearsOfExperience', e.target.value)}
                   className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
@@ -481,10 +474,10 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
+                <label htmlFor="educator-level-focus" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
                   Education Level Focus
                 </label>
-                <select
+                <select id="educator-level-focus"
                   value={formData.educationLevel}
                   onChange={(e) => updateField('educationLevel', e.target.value)}
                   className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
@@ -499,10 +492,10 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
+                <label htmlFor="educator-employment-status" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
                   Current Employment Status
                 </label>
-                <select
+                <select id="educator-employment-status"
                   value={formData.currentEmploymentStatus}
                   onChange={(e) => updateField('currentEmploymentStatus', e.target.value)}
                   className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
@@ -515,10 +508,10 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
+                <label htmlFor="educator-subjects" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
                   Subjects / Main Teaching Disciplines
                 </label>
-                <input
+                <input id="educator-subjects"
                   type="text"
                   value={formData.subjects}
                   onChange={(e) => updateField('subjects', e.target.value)}
@@ -754,18 +747,16 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
+                          if (file.size > 10 * 1024 * 1024) {
+                            setErrors(prev => ({ ...prev, cvFileName: 'CV must be 10MB or smaller' }));
+                            e.target.value = '';
+                            return;
+                          }
                           handleFileDropMock('cvFileName', file.name, `${(file.size / 1024 / 1024).toFixed(1)} MB`);
                         }
                       }}
                     />
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => handleFileDropMock('cvFileName', `${formData.firstName || 'Candidate'}_CV_Updated.pdf`, '1.8 MB')}
-                    className="px-3 py-2 bg-white border border-[#D9E2EC] text-[#2463A7] hover:bg-slate-50 text-xs font-semibold rounded-lg"
-                  >
-                    Attach Sample CV
-                  </button>
                 </div>
               )}
               {errors.cvFileName && <p className="text-xs text-[#B91C1C] mt-2">{errors.cvFileName}</p>}

@@ -16,12 +16,12 @@ export const COMPANY_INFO = {
   contactEmail: 'admissions@brightstartedu.co.zw',
   supportEmail: 'info@brightstartedu.co.zw',
   careersEmail: 'careers@brightstartedu.co.zw',
-  phone: '+263 (0) 242 000 000 / +263 77 000 0000',
-  phoneRaw: '+263770000000',
-  whatsAppNumber: '+263770000000',
-  whatsAppLink: 'https://wa.me/263770000000?text=Hello%20Bright%20Start%20Edu%20Recruitment%2C%20I%20would%20like%20to%20enquire%20about...',
+  phone: 'Available after verification',
+  phoneRaw: '',
+  whatsAppNumber: '',
+  whatsAppLink: '',
   
-  officeAddress: 'Harare Central Business District, Harare, Zimbabwe',
+  officeAddress: 'Zimbabwe — consultations by appointment',
   workingHours: 'Monday – Friday: 08:00 – 17:00 (CAT)',
   businessHours: 'Monday – Friday: 08:00 – 17:00 (CAT)',
   

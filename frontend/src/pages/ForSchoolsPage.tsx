@@ -22,7 +22,7 @@ export const ForSchoolsPage: React.FC<ForSchoolsPageProps> = ({ onNavigate }) =>
             Institutional Staffing Solutions
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight max-w-3xl mx-auto leading-tight">
-            Build your school’s future with verified, passionate educators.
+            Build your school’s future with carefully considered education professionals.
           </h1>
           <p className="mt-4 text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
             Eliminate recruitment friction, safeguard your learners, and access pre-vetted teachers, HODs, and leadership talent tailored to your school’s ethos.

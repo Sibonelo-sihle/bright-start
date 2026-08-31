@@ -5,6 +5,8 @@ import { COMPANY_INFO } from '../data/constants';
 export const WhatsAppFloating: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
+  if (!COMPANY_INFO.whatsAppLink) return null;
+
   const cleanPhone = COMPANY_INFO.phone.replace(/[^0-9]/g, '');
 
   return (
@@ -31,7 +33,7 @@ export const WhatsAppFloating: React.FC = () => {
           </p>
 
           <a
-            href={`https://wa.me/${cleanPhone}?text=Hello%20Bright%20Start%20Edu%20Recruitment,%20I%20would%20like%20to%20inquire%20about...`}
+            href={COMPANY_INFO.whatsAppLink}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full py-2 px-3 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-xs transition-colors"

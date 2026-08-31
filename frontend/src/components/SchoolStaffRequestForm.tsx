@@ -10,10 +10,10 @@ interface StaffRequestProps {
 const initialRequestData: EmployerStaffingRequestData = {
   schoolName: '',
   contactPerson: '',
-  jobTitle: 'Principal / Head of Academics',
+  jobTitle: '',
   email: '',
   phone: '',
-  location: 'Harare, Zimbabwe',
+  location: '',
   roleRequired: 'Senior Secondary Teacher',
   subjectDepartment: 'Mathematics & Science',
   educationLevel: 'Secondary / High School',
@@ -21,7 +21,7 @@ const initialRequestData: EmployerStaffingRequestData = {
   preferredStartDate: 'Next Academic Term',
   employmentType: 'Permanent Full-Time',
   roleDescription: '',
-  minimumRequirements: 'Bachelor of Education / relevant degree with teaching qualification and minimum 2 years experience.',
+  minimumRequirements: '',
   additionalInformation: '',
   urgencyLevel: 'Standard',
 };
@@ -30,7 +30,6 @@ export const SchoolStaffRequestForm: React.FC<StaffRequestProps> = ({ onSuccessN
   const [formData, setFormData] = useState<EmployerStaffingRequestData>(initialRequestData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [requestRef, setRequestRef] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const updateField = (field: keyof EmployerStaffingRequestData, value: any) => {
@@ -48,10 +47,13 @@ export const SchoolStaffRequestForm: React.FC<StaffRequestProps> = ({ onSuccessN
     const errs: Record<string, string> = {};
     if (!formData.schoolName.trim()) errs.schoolName = 'School / Institution name is required';
     if (!formData.contactPerson.trim()) errs.contactPerson = 'Contact person name is required';
-    if (!formData.email.trim() || !formData.email.includes('@')) errs.email = 'Valid official email address is required';
-    if (!formData.phone.trim()) errs.phone = 'Phone number is required';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) errs.email = 'Valid official email address is required';
+    if (formData.phone.replace(/\D/g, '').length < 7) errs.phone = 'Valid phone number is required';
+    if (!formData.location.trim()) errs.location = 'School location is required';
     if (!formData.roleRequired.trim()) errs.roleRequired = 'Role required is required';
+    if (!Number.isFinite(formData.numberOfPositions) || formData.numberOfPositions < 1) errs.numberOfPositions = 'Enter at least one position';
     if (!formData.roleDescription.trim()) errs.roleDescription = 'Please provide a brief description of the role';
+    if (!formData.minimumRequirements.trim()) errs.minimumRequirements = 'Minimum requirements are required';
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -62,8 +64,6 @@ export const SchoolStaffRequestForm: React.FC<StaffRequestProps> = ({ onSuccessN
 
     setIsSubmitting(true);
     setTimeout(() => {
-      const ref = `BSR-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
-      setRequestRef(ref);
       setIsSubmitting(false);
       setIsSubmitted(true);
     }, 1000);
@@ -77,36 +77,26 @@ export const SchoolStaffRequestForm: React.FC<StaffRequestProps> = ({ onSuccessN
         </div>
 
         <span className="px-3 py-1 rounded-full bg-[#FEF3D6] text-[#102A43] text-xs font-bold uppercase tracking-wider border border-[#F4B942]/40">
-          Staffing Request Received
+          Staffing Request Preview Complete
         </span>
 
         <h2 className="text-2xl sm:text-3xl font-extrabold text-[#102A43] mt-4 mb-2">
-          Thank you for choosing Bright Start.
+          Your request details are ready.
         </h2>
 
         <p className="text-sm text-[#627D98] max-w-lg mx-auto leading-relaxed">
-          A Bright Start recruitment consultant will review your staffing requirements and contact you within 24–48 hours.
+          This development preview has validated the form, but the request has not been transmitted or stored. Please use the contact page for current assistance.
         </p>
 
-        {/* Reference badge */}
-        <div className="my-6 p-4 bg-[#F8F7F3] rounded-xl border border-[#D9E2EC] max-w-md mx-auto text-left flex items-center justify-between">
-          <div>
-            <span className="text-[10px] uppercase font-bold text-[#627D98] block">Request Reference ID</span>
-            <span className="text-base font-black text-[#102A43] font-mono">{requestRef}</span>
-          </div>
-          <span className="text-xs px-2.5 py-1 bg-[#2463A7] text-white font-bold rounded-md">
-            Candidate Matching Initiated
-          </span>
-        </div>
+        <p className="my-6 rounded-xl border border-[#D9E2EC] bg-[#F8F7F3] p-4 text-sm font-semibold text-[#102A43]">Online request delivery will be activated when the Bright Start staffing service goes live.</p>
 
         <div className="bg-[#EEF4F8] rounded-xl p-5 border border-[#D9E2EC] text-left text-xs text-[#1F2933] space-y-2 mb-8">
           <div className="font-bold text-[#102A43] text-sm flex items-center gap-1.5">
             <ShieldCheck className="w-4 h-4 text-[#3D8061]" />
-            What happens next?
+            Before requests go live:
           </div>
-          <p>• Our education recruitment specialist will verify the timetable, syllabus level, and cultural profile of <strong className="text-[#102A43]">{formData.schoolName}</strong>.</p>
-          <p>• We will prepare a shortlisted dossier of pre-screened, verified candidates.</p>
-          <p>• We coordinate candidate interview schedules and demonstration lessons at your convenience.</p>
+          <p>• Secure request delivery and status tracking are still being prepared.</p>
+          <p>• No candidate matching has started from this preview.</p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -149,6 +139,7 @@ export const SchoolStaffRequestForm: React.FC<StaffRequestProps> = ({ onSuccessN
       </div>
 
       <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-8">
+        <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900" role="note"><strong>Development preview:</strong> this request is not transmitted or stored.</p>
         {/* Section 1: School & Contact Details */}
         <div>
           <div className="border-b border-[#D9E2EC] pb-3 mb-5">
@@ -159,38 +150,41 @@ export const SchoolStaffRequestForm: React.FC<StaffRequestProps> = ({ onSuccessN
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
+              <label htmlFor="staff-school-name" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
                 School / Institution Name <span className="text-[#B91C1C]">*</span>
               </label>
               <input
+                id="staff-school-name" aria-invalid={!!errors.schoolName} aria-describedby={errors.schoolName ? 'staff-school-name-error' : undefined}
                 type="text"
                 value={formData.schoolName}
                 onChange={(e) => updateField('schoolName', e.target.value)}
                 placeholder="e.g. Heritage Senior School"
                 className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
               />
-              {errors.schoolName && <p className="text-xs text-[#B91C1C] mt-1">{errors.schoolName}</p>}
+              {errors.schoolName && <p id="staff-school-name-error" className="text-xs text-[#B91C1C] mt-1">{errors.schoolName}</p>}
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
+              <label htmlFor="staff-contact-person" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
                 Contact Person Name <span className="text-[#B91C1C]">*</span>
               </label>
               <input
+                id="staff-contact-person" aria-invalid={!!errors.contactPerson} aria-describedby={errors.contactPerson ? 'staff-contact-person-error' : undefined}
                 type="text"
                 value={formData.contactPerson}
                 onChange={(e) => updateField('contactPerson', e.target.value)}
                 placeholder="e.g. Dr. Farai Mutasa"
                 className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
               />
-              {errors.contactPerson && <p className="text-xs text-[#B91C1C] mt-1">{errors.contactPerson}</p>}
+              {errors.contactPerson && <p id="staff-contact-person-error" className="text-xs text-[#B91C1C] mt-1">{errors.contactPerson}</p>}
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
+              <label htmlFor="staff-job-title" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
                 Official Job Title
               </label>
               <input
+                id="staff-job-title"
                 type="text"
                 value={formData.jobTitle}
                 onChange={(e) => updateField('jobTitle', e.target.value)}
@@ -200,44 +194,50 @@ export const SchoolStaffRequestForm: React.FC<StaffRequestProps> = ({ onSuccessN
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
+              <label htmlFor="staff-email" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
                 Official Email Address <span className="text-[#B91C1C]">*</span>
               </label>
               <input
+                id="staff-email" aria-invalid={!!errors.email} aria-describedby={errors.email ? 'staff-email-error' : undefined}
                 type="email"
                 value={formData.email}
                 onChange={(e) => updateField('email', e.target.value)}
                 placeholder="e.g. headmaster@school.co.zw"
                 className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
               />
-              {errors.email && <p className="text-xs text-[#B91C1C] mt-1">{errors.email}</p>}
+              {errors.email && <p id="staff-email-error" className="text-xs text-[#B91C1C] mt-1">{errors.email}</p>}
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
+              <label htmlFor="staff-phone" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
                 Contact Phone / WhatsApp <span className="text-[#B91C1C]">*</span>
               </label>
               <input
+                id="staff-phone" aria-invalid={!!errors.phone} aria-describedby={errors.phone ? 'staff-phone-error' : undefined}
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => updateField('phone', e.target.value)}
                 placeholder="e.g. +263 (0) 242 123456"
                 className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
               />
-              {errors.phone && <p className="text-xs text-[#B91C1C] mt-1">{errors.phone}</p>}
+              {errors.phone && <p id="staff-phone-error" className="text-xs text-[#B91C1C] mt-1">{errors.phone}</p>}
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
+              <label htmlFor="staff-location" className="block text-xs font-bold uppercase tracking-wider text-[#102A43] mb-1.5">
                 Location / Campus City <span className="text-[#B91C1C]">*</span>
               </label>
               <input
+                id="staff-location"
+                aria-invalid={!!errors.location}
+                aria-describedby={errors.location ? 'staff-location-error' : undefined}
                 type="text"
                 value={formData.location}
                 onChange={(e) => updateField('location', e.target.value)}
                 placeholder="e.g. Harare / Bulawayo / Mutare / Regional"
                 className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
               />
+              {errors.location && <p id="staff-location-error" className="mt-1 text-xs text-[#B91C1C]">{errors.location}</p>}
             </div>
           </div>
         </div>
@@ -303,11 +303,13 @@ export const SchoolStaffRequestForm: React.FC<StaffRequestProps> = ({ onSuccessN
               <input
                 type="number"
                 min="1"
+                aria-invalid={!!errors.numberOfPositions}
                 max="50"
                 value={formData.numberOfPositions}
                 onChange={(e) => updateField('numberOfPositions', parseInt(e.target.value) || 1)}
                 className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
               />
+              {errors.numberOfPositions && <p className="mt-1 text-xs text-[#B91C1C]">{errors.numberOfPositions}</p>}
             </div>
 
             <div>
@@ -359,6 +361,7 @@ export const SchoolStaffRequestForm: React.FC<StaffRequestProps> = ({ onSuccessN
               </label>
               <textarea
                 rows={3}
+                aria-invalid={!!errors.roleDescription}
                 value={formData.roleDescription}
                 onChange={(e) => updateField('roleDescription', e.target.value)}
                 placeholder="Outline syllabus expectations, exam levels, extra-curricular requirements, or boarding responsibilities..."
@@ -373,11 +376,13 @@ export const SchoolStaffRequestForm: React.FC<StaffRequestProps> = ({ onSuccessN
               </label>
               <textarea
                 rows={2}
+                aria-invalid={!!errors.minimumRequirements}
                 value={formData.minimumRequirements}
                 onChange={(e) => updateField('minimumRequirements', e.target.value)}
                 placeholder="e.g. Degree in Mathematics, 3+ years Cambridge IGCSE experience, strong boarding leadership..."
                 className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D9E2EC] rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#2463A7]"
               />
+              {errors.minimumRequirements && <p className="mt-1 text-xs text-[#B91C1C]">{errors.minimumRequirements}</p>}
             </div>
 
             <div>
