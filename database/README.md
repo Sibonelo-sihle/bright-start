@@ -1,7 +1,7 @@
-# Database placeholder
+# Shared Supabase database
 
-No database is connected and no SQL is executed by this repository.
+Migrations in `migrations/` define the shared data contract used by the public site now and a separate authenticated management application later. Apply migrations through the Supabase CLI; do not paste ad-hoc changes into production.
 
-Future entities are expected to include jobs, candidates, applications, candidate documents, staff requests, contact messages, admin profiles, internal notes, and company settings.
+The public site reads published jobs and submits staffing/contact records through constrained RLS policies. Educator profiles, applications, and private documents are submitted through the `submit-educator-application` Edge Function so no candidate-table insert permission is granted to anonymous browsers.
 
-The `migrations/`, `schema/`, and `seed/` directories are intentionally empty until the database phase is approved. Production or personally identifiable data must never be committed as seed data.
+No production or personally identifiable seed data belongs in this repository.

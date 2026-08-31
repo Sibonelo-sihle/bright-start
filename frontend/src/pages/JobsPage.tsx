@@ -1,14 +1,14 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Filter, Briefcase, UserPlus, Info } from 'lucide-react';
 import { JobListing, PageRoute } from '../types';
-import { SAMPLE_JOBS } from '../data/constants';
 import { JobCard, JobDetailsModal } from '../components/JobCard';
+import { getPublishedJobs } from '../services/publicJobs';
 
-const jobSlug = (job: JobListing) => `${job.id}-${job.title}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+const jobSlug = (job: JobListing) => job.slug || `${job.id}-${job.title}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
 interface JobsPageProps {
   onNavigate: (page: PageRoute) => void;
-  onApplyForJob: (jobTitle: string) => void;
+  onApplyForJob: (job: {id:string;title:string;slug?:string}) => void;
 }
 
 export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onApplyForJob }) => {
@@ -16,22 +16,26 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onApplyForJob })
   const [selectedRoleType, setSelectedRoleType] = useState('All');
   const [selectedLocation, setSelectedLocation] = useState('All');
   const [selectedEducationLevel, setSelectedEducationLevel] = useState('All');
-  const [activeModalJob, setActiveModalJob] = useState<JobListing | null>(() => {
-    const slug = window.location.pathname.startsWith('/jobs/') ? window.location.pathname.slice(6) : '';
-    return SAMPLE_JOBS.find(job => jobSlug(job) === slug) || null;
-  });
+  const [jobs,setJobs]=useState<JobListing[]>([]);
+  const [isLoading,setIsLoading]=useState(true);
+  const [loadError,setLoadError]=useState('');
+  const [slugNotFound,setSlugNotFound]=useState(false);
+  const [activeModalJob, setActiveModalJob] = useState<JobListing | null>(null);
+
+  useEffect(()=>{getPublishedJobs().then(items=>{setJobs(items);const slug=window.location.pathname.startsWith('/jobs/')?window.location.pathname.slice(6):'';const match=items.find(job=>jobSlug(job)===slug)||null;setActiveModalJob(match);setSlugNotFound(Boolean(slug&&!match));}).catch(()=>setLoadError('Vacancies could not be loaded. Please try again shortly.')).finally(()=>setIsLoading(false));},[]);
 
   useEffect(() => {
     const handlePopState = () => {
       const slug = window.location.pathname.startsWith('/jobs/') ? window.location.pathname.slice(6) : '';
-      setActiveModalJob(SAMPLE_JOBS.find(job => jobSlug(job) === slug) || null);
+      setActiveModalJob(jobs.find(job => jobSlug(job) === slug) || null);
+      setSlugNotFound(Boolean(slug&&!jobs.some(job=>jobSlug(job)===slug)));
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  }, [jobs]);
 
   const filteredJobs = useMemo(() => {
-    return SAMPLE_JOBS.filter((job) => {
+    return jobs.filter((job) => {
       const matchesSearch =
         searchQuery === '' ||
         job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -39,7 +43,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onApplyForJob })
         job.employer.toLowerCase().includes(searchQuery.toLowerCase()) ||
         job.requirements.some(r => r.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      const categoryText = `${job.title} ${job.department || ''} ${job.educationLevel}`.toLowerCase();
+      const categoryText = `${job.title} ${job.department || ''} ${job.educationLevel} ${job.roleCategory || ''}`.toLowerCase();
       const matchesRole = selectedRoleType === 'All' ||
         (selectedRoleType === 'Teaching' && job.roleType !== 'Leadership') ||
         (selectedRoleType === 'Early Childhood' && job.educationLevel === 'Early Childhood') ||
@@ -55,19 +59,21 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onApplyForJob })
 
       return matchesSearch && matchesRole && matchesLocation && matchesLevel;
     });
-  }, [searchQuery, selectedRoleType, selectedLocation, selectedEducationLevel]);
+  }, [jobs, searchQuery, selectedRoleType, selectedLocation, selectedEducationLevel]);
 
   const handleApplyClick = (job: JobListing) => {
-    onApplyForJob(job.title);
+    onApplyForJob({id:job.id,title:job.title,slug:job.slug});
   };
 
   const openJob = (job: JobListing) => {
     setActiveModalJob(job);
+    setSlugNotFound(false);
     window.history.pushState({}, '', `/jobs/${jobSlug(job)}`);
   };
 
   const closeJob = () => {
     setActiveModalJob(null);
+    setSlugNotFound(false);
     if (window.location.pathname !== '/jobs') window.history.pushState({}, '', '/jobs');
   };
 
@@ -121,10 +127,10 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onApplyForJob })
             <Info className="w-4 h-4 text-[#2463A7] shrink-0 mt-0.5" />
             <div className="space-y-1">
               <span className="font-bold text-[#102A43] block">
-                Demonstration Vacancy Board:
+                Published Opportunities:
               </span>
               <p className="text-[#627D98] leading-relaxed">
-                Every vacancy currently displayed below is a clearly labelled sample profile for website demonstration. No listing should be treated as a live vacancy until Bright Start publishes verified opportunities.
+                This board displays only opportunities currently published by Bright Start. If no role suits your profile, you can still join our educator network.
               </p>
             </div>
           </div>
@@ -173,14 +179,14 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onApplyForJob })
                 <label htmlFor="education-level-filter" className="font-bold text-[#102A43]">Education level:</label>
                 <select id="education-level-filter" value={selectedEducationLevel} onChange={(e) => setSelectedEducationLevel(e.target.value)} className="rounded-lg border border-[#D9E2EC] bg-[#F8F7F3] px-2.5 py-1.5 text-xs text-[#1F2933] focus:ring-2 focus:ring-[#2463A7]">
                   <option value="All">All Levels</option>
-                  {[...new Set(SAMPLE_JOBS.map(job => job.educationLevel))].map(level => <option key={level} value={level}>{level}</option>)}
+                  {[...new Set(jobs.map(job => job.educationLevel))].map(level => <option key={level} value={level}>{level}</option>)}
                 </select>
               </div>
             </div>
           </div>
 
           {/* Results Grid */}
-          {filteredJobs.length > 0 ? (
+          {isLoading ? <div className="rounded-2xl border border-[#D9E2EC] bg-white p-12 text-center text-sm text-[#627D98]">Loading opportunities…</div> : loadError ? <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center text-sm text-red-700">{loadError}</div> : slugNotFound ? <div role="alert" className="rounded-2xl border border-[#D9E2EC] bg-white p-12 text-center"><h2 className="font-bold text-[#102A43]">This opportunity is unavailable</h2><p className="mt-2 text-sm text-[#627D98]">It may have closed or the link may be incorrect.</p><button onClick={closeJob} className="mt-5 rounded-lg bg-[#102A43] px-4 py-2 text-sm font-bold text-white">View open opportunities</button></div> : filteredJobs.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredJobs.map((job) => (
                 <JobCard
@@ -194,11 +200,11 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onApplyForJob })
           ) : (
             <div className="bg-white rounded-2xl p-12 text-center border border-[#D9E2EC] max-w-lg mx-auto">
               <Briefcase className="w-12 h-12 text-[#627D98] mx-auto mb-4" />
-              <h3 className="text-base font-bold text-[#102A43] mb-2">No matching positions found</h3>
+              <h3 className="text-base font-bold text-[#102A43] mb-2">{jobs.length ? 'No matching positions found' : 'There are currently no open opportunities'}</h3>
               <p className="text-xs text-[#627D98] mb-6">
-                Try clearing your search query or adjusting your filters to see all available roles.
+                {jobs.length ? 'Try clearing your search query or adjusting your filters.' : 'You can still join the Bright Start educator network for future opportunities.'}
               </p>
-              <button
+              {jobs.length ? <button
                 onClick={() => {
                   setSearchQuery('');
                   setSelectedRoleType('All');
@@ -208,7 +214,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({ onNavigate, onApplyForJob })
                 className="px-4 py-2 bg-[#102A43] text-white text-xs font-bold rounded-lg"
               >
                 Reset All Filters
-              </button>
+              </button> : <button onClick={()=>onNavigate('apply')} className="rounded-lg bg-[#F4B942] px-5 py-2.5 text-sm font-bold text-[#102A43]">Join Our Educator Network</button>}
             </div>
           )}
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { School, CheckCircle2, Send, ShieldCheck, HelpCircle } from 'lucide-react';
 import { EmployerStaffingRequestData } from '../types';
 import { COMPANY_INFO } from '../data/constants';
+import { submitStaffRequest } from '../services/publicSubmissions';
 
 interface StaffRequestProps {
   onSuccessNavigate?: () => void;
@@ -31,6 +32,7 @@ export const SchoolStaffRequestForm: React.FC<StaffRequestProps> = ({ onSuccessN
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError,setSubmitError]=useState('');
 
   const updateField = (field: keyof EmployerStaffingRequestData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -58,15 +60,15 @@ export const SchoolStaffRequestForm: React.FC<StaffRequestProps> = ({ onSuccessN
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
-    setIsSubmitting(true);
-    setTimeout(() => {
+    setSubmitError('');setIsSubmitting(true);
+    try { await submitStaffRequest(formData);
       setIsSubmitting(false);
       setIsSubmitted(true);
-    }, 1000);
+    } catch(error){setIsSubmitting(false);setSubmitError(error instanceof Error?error.message:'Your request could not be submitted. Please try again.');}
   };
 
   if (isSubmitted) {
@@ -77,26 +79,25 @@ export const SchoolStaffRequestForm: React.FC<StaffRequestProps> = ({ onSuccessN
         </div>
 
         <span className="px-3 py-1 rounded-full bg-[#FEF3D6] text-[#102A43] text-xs font-bold uppercase tracking-wider border border-[#F4B942]/40">
-          Staffing Request Preview Complete
+          Staffing Request Received
         </span>
 
         <h2 className="text-2xl sm:text-3xl font-extrabold text-[#102A43] mt-4 mb-2">
-          Your request details are ready.
+          Thank you for contacting Bright Start.
         </h2>
 
         <p className="text-sm text-[#627D98] max-w-lg mx-auto leading-relaxed">
-          This development preview has validated the form, but the request has not been transmitted or stored. Please use the contact page for current assistance.
+          Your staffing request has been securely received. A recruitment consultant will review the details and contact you.
         </p>
 
-        <p className="my-6 rounded-xl border border-[#D9E2EC] bg-[#F8F7F3] p-4 text-sm font-semibold text-[#102A43]">Online request delivery will be activated when the Bright Start staffing service goes live.</p>
 
         <div className="bg-[#EEF4F8] rounded-xl p-5 border border-[#D9E2EC] text-left text-xs text-[#1F2933] space-y-2 mb-8">
           <div className="font-bold text-[#102A43] text-sm flex items-center gap-1.5">
             <ShieldCheck className="w-4 h-4 text-[#3D8061]" />
-            Before requests go live:
+            What happens next:
           </div>
-          <p>• Secure request delivery and status tracking are still being prepared.</p>
-          <p>• No candidate matching has started from this preview.</p>
+          <p>• Our team will review your role, timetable, and qualification requirements.</p>
+          <p>• A consultant will contact you before any candidate matching begins.</p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -139,7 +140,7 @@ export const SchoolStaffRequestForm: React.FC<StaffRequestProps> = ({ onSuccessN
       </div>
 
       <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-8">
-        <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900" role="note"><strong>Development preview:</strong> this request is not transmitted or stored.</p>
+        {submitError&&<p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{submitError}</p>}
         {/* Section 1: School & Contact Details */}
         <div>
           <div className="border-b border-[#D9E2EC] pb-3 mb-5">

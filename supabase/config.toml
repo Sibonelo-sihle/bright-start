@@ -1,0 +1,2 @@
+[functions.submit-educator-application]
+verify_jwt = true

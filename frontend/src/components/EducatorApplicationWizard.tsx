@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { EducatorApplicationData } from '../types';
 import { COMPANY_INFO } from '../data/constants';
+import { submitEducatorApplication } from '../services/publicSubmissions';
 
 const STORAGE_KEY = 'brightstart_educator_app_draft';
 
@@ -63,17 +64,17 @@ const initialFormData: EducatorApplicationData = {
 };
 
 interface WizardProps {
-  initialJobTitle?: string;
+  selectedJob?: {id:string;title:string;slug?:string};
   onSuccessNavigate?: () => void;
 }
 
-export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTitle, onSuccessNavigate }) => {
+export const EducatorApplicationWizard: React.FC<WizardProps> = ({ selectedJob, onSuccessNavigate }) => {
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [formData, setFormData] = useState<EducatorApplicationData>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        return JSON.parse(saved);
+        return { ...JSON.parse(saved), cvFileName:'', cvFileSize:'', qualificationsFileName:'', certificatesFileName:'' };
       }
     } catch {
       // ignore
@@ -84,6 +85,10 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const [submitError,setSubmitError]=useState('');
+  const [cvFile,setCvFile]=useState<File|null>(null);
+  const [qualificationFile,setQualificationFile]=useState<File|null>(null);
+  const [certificateFile,setCertificateFile]=useState<File|null>(null);
 
   // Auto-save form changes locally
   useEffect(() => {
@@ -154,8 +159,7 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
     }
 
     if (step === 5) {
-      // Simulated or uploaded CV check
-      if (!formData.cvFileName) {
+      if (!cvFile) {
         errs.cvFileName = 'Please attach or select your CV (PDF or DOCX)';
       }
     }
@@ -186,18 +190,20 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
     window.scrollTo({ top: 150, behavior: 'smooth' });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateStep(7)) return;
 
-    setIsSubmitting(true);
-    setTimeout(() => {
+    if(!cvFile)return;
+    setSubmitError('');setIsSubmitting(true);
+    try {
+      await submitEducatorApplication(formData,{cv:cvFile,qualification:qualificationFile||undefined,certificate:certificateFile||undefined},selectedJob?.id);
       setIsSubmitting(false);
       setIsSubmitted(true);
       try {
         localStorage.removeItem(STORAGE_KEY);
       } catch {}
-    }, 1200);
+    } catch(error){setIsSubmitting(false);setSubmitError(error instanceof Error?error.message:'Your application could not be submitted. Please try again.');}
   };
 
   const handleFileDropMock = (field: 'cvFileName' | 'qualificationsFileName' | 'certificatesFileName', fileName: string, size: string) => {
@@ -215,26 +221,26 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
         </div>
 
         <span className="px-3 py-1 rounded-full bg-[#FEF3D6] text-[#102A43] text-xs font-bold uppercase tracking-wider border border-[#F4B942]/40">
-          Application Preview Complete
+          Application Received
         </span>
 
         <h2 className="text-2xl sm:text-3xl font-extrabold text-[#102A43] mt-4 mb-2">
-          Your application preview is ready
+          Thank you for applying
         </h2>
 
         <p className="text-sm text-[#627D98] max-w-lg mx-auto leading-relaxed">
-          Thank you, <strong className="text-[#102A43]">{formData.firstName} {formData.surname}</strong>. This development preview has validated your form, but no information or documents have been sent to Bright Start yet.
+          Thank you, <strong className="text-[#102A43]">{formData.firstName} {formData.surname}</strong>. Your profile and documents have been securely submitted for review.
         </p>
 
-        <p className="my-6 rounded-xl border border-[#D9E2EC] bg-[#F8F7F3] p-4 text-sm font-semibold text-[#102A43]">Online submission will be activated when the Bright Start application service goes live.</p>
+        <p className="my-6 rounded-xl border border-[#D9E2EC] bg-[#F8F7F3] p-4 text-sm font-semibold text-[#102A43]">Our recruitment team will contact you if your profile matches a suitable opportunity.</p>
 
         <div className="bg-[#EEF4F8] rounded-xl p-5 border border-[#D9E2EC] text-left text-xs text-[#1F2933] space-y-2 mb-8">
           <div className="font-bold text-[#102A43] text-sm flex items-center gap-1.5">
             <ShieldCheck className="w-4 h-4 text-[#3D8061]" />
-            Before applications go live:
+            What happens next:
           </div>
-          <p>Submission delivery and secure document storage are still being prepared.</p>
-          <p>Please use the contact page if you need assistance in the meantime.</p>
+          <p>Your profile will be reviewed against your selected role and preferences.</p>
+          <p>Your documents remain private and are available only to authorised recruitment staff.</p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -243,6 +249,7 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
               setIsSubmitted(false);
               setCurrentStep(1);
               setFormData(initialFormData);
+              setCvFile(null); setQualificationFile(null); setCertificateFile(null); setSubmitError('');
             }}
             className="w-full sm:w-auto px-6 py-2.5 bg-white border border-[#D9E2EC] text-[#102A43] font-bold text-xs rounded-lg hover:bg-slate-50 transition-colors"
           >
@@ -274,9 +281,9 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
             <h1 className="text-xl sm:text-2xl font-extrabold text-white">
               Educator Registration & CV Submission
             </h1>
-            {initialJobTitle && (
+            {selectedJob && (
               <p className="text-xs text-[#F4B942] font-semibold mt-1">
-                Applying for: {initialJobTitle}
+                Applying for: {selectedJob.title}
               </p>
             )}
           </div>
@@ -327,7 +334,7 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
 
       {/* Main Wizard Form Body */}
       <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-6">
-        <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900" role="note"><strong>Development preview:</strong> form data and documents are not transmitted or stored.</p>
+        {submitError&&<p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{submitError}</p>}
         {/* STEP 1: Personal Information */}
         {currentStep === 1 && (
           <div className="space-y-6 animate-in fade-in duration-200">
@@ -729,7 +736,7 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
                   </div>
                   <button
                     type="button"
-                    onClick={() => updateField('cvFileName', '')}
+                    onClick={() => {updateField('cvFileName', '');setCvFile(null)}}
                     className="text-[#B91C1C] hover:text-red-700 p-1"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -752,6 +759,10 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
                             e.target.value = '';
                             return;
                           }
+                          if (!['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)) {
+                            setErrors(prev => ({ ...prev, cvFileName: 'CV must be PDF, DOC, or DOCX' })); e.target.value=''; return;
+                          }
+                          setCvFile(file);
                           handleFileDropMock('cvFileName', file.name, `${(file.size / 1024 / 1024).toFixed(1)} MB`);
                         }
                       }}
@@ -772,17 +783,19 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
                 {formData.qualificationsFileName ? (
                   <div className="p-2 bg-white rounded border border-[#3D8061] text-xs flex items-center justify-between">
                     <span className="truncate text-[#102A43]">{formData.qualificationsFileName}</span>
-                    <button type="button" onClick={() => updateField('qualificationsFileName', '')} className="text-red-500">✕</button>
+                    <button type="button" onClick={() => {updateField('qualificationsFileName', '');setQualificationFile(null)}} className="text-red-500">✕</button>
                   </div>
                 ) : (
                   <label className="cursor-pointer block text-center p-2.5 bg-white border border-dashed border-[#D9E2EC] rounded-lg text-xs text-[#2463A7] font-semibold hover:bg-slate-50">
                     + Attach Degree Certificate
                     <input
                       type="file"
+                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                       className="hidden"
                       onChange={(e) => {
                         if (e.target.files?.[0]) {
-                          updateField('qualificationsFileName', e.target.files[0].name);
+                          const file=e.target.files[0]; if(file.size>10*1024*1024){setErrors(prev=>({...prev,qualificationsFileName:'File must be 10MB or smaller'}));return;} setQualificationFile(file);
+                          updateField('qualificationsFileName', file.name);
                         }
                       }}
                     />
@@ -798,17 +811,19 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ initialJobTit
                 {formData.certificatesFileName ? (
                   <div className="p-2 bg-white rounded border border-[#3D8061] text-xs flex items-center justify-between">
                     <span className="truncate text-[#102A43]">{formData.certificatesFileName}</span>
-                    <button type="button" onClick={() => updateField('certificatesFileName', '')} className="text-red-500">✕</button>
+                    <button type="button" onClick={() => {updateField('certificatesFileName', '');setCertificateFile(null)}} className="text-red-500">✕</button>
                   </div>
                 ) : (
                   <label className="cursor-pointer block text-center p-2.5 bg-white border border-dashed border-[#D9E2EC] rounded-lg text-xs text-[#2463A7] font-semibold hover:bg-slate-50">
                     + Attach Testimonials / Reference Letters
                     <input
                       type="file"
+                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                       className="hidden"
                       onChange={(e) => {
                         if (e.target.files?.[0]) {
-                          updateField('certificatesFileName', e.target.files[0].name);
+                          const file=e.target.files[0]; if(file.size>10*1024*1024){setErrors(prev=>({...prev,certificatesFileName:'File must be 10MB or smaller'}));return;} setCertificateFile(file);
+                          updateField('certificatesFileName', file.name);
                         }
                       }}
                     />

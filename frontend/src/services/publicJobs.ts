@@ -1,0 +1,9 @@
+import type { JobListing } from '../types';
+import { requireSupabase } from '../lib/supabase';
+import type { Database } from '../types/database';
+type JobRow=Database['public']['Tables']['jobs']['Row'];
+const roleTypes:JobListing['roleType'][]=['Full-Time','Part-Time','Contract','Permanent','Leadership'];
+const levels:JobListing['educationLevel'][]=['Early Childhood','Primary','Secondary','High School','Tertiary / Vocational','All Levels'];
+export function mapJob(row:JobRow):JobListing{return {id:row.id,slug:row.slug,title:row.title,employer:row.school_name,location:row.location,roleCategory:row.role_category,roleType:roleTypes.includes(row.role_type as JobListing['roleType'])?row.role_type as JobListing['roleType']:'Contract',educationLevel:levels.includes(row.education_level as JobListing['educationLevel'])?row.education_level as JobListing['educationLevel']:'All Levels',employmentType:row.employment_type,department:row.subject_department||undefined,postedDate:new Date(row.published_at||row.created_at).toLocaleDateString('en-ZW',{day:'2-digit',month:'short',year:'numeric'}),deadline:row.application_deadline||undefined,startDate:row.start_date||undefined,description:row.description,responsibilities:row.responsibilities,requirements:row.minimum_requirements,preferredRequirements:row.preferred_requirements,benefits:[],salary:row.salary_text||undefined};}
+export async function getPublishedJobs(){const {data,error}=await requireSupabase().from('jobs').select('*').eq('status','published').order('published_at',{ascending:false});if(error)throw error;return (data||[]).map(mapJob);}
+export async function getPublishedJobBySlug(slug:string){const {data,error}=await requireSupabase().from('jobs').select('*').eq('status','published').eq('slug',slug).maybeSingle();if(error)throw error;return data?mapJob(data):null;}

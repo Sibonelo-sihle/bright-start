@@ -14,10 +14,13 @@ export type PageRoute =
 
 export interface JobListing {
   id: string;
+  slug?: string;
   title: string;
   employer: string;
   location: string;
   roleType: 'Full-Time' | 'Part-Time' | 'Contract' | 'Permanent' | 'Leadership';
+  roleCategory?: string;
+  employmentType?: string;
   educationLevel: 'Early Childhood' | 'Primary' | 'Secondary' | 'High School' | 'Tertiary / Vocational' | 'All Levels';
   department?: string;
   postedDate: string;
@@ -26,6 +29,9 @@ export interface JobListing {
   responsibilities: string[];
   requirements: string[];
   benefits: string[];
+  preferredRequirements?: string[];
+  salary?: string;
+  startDate?: string;
   isFeatured?: boolean;
   isSample?: boolean;
 }

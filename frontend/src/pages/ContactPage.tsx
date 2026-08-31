@@ -3,6 +3,7 @@ import { Mail, Phone, MapPin, Clock, Send, CheckCircle2, MessageSquare, HelpCirc
 import { COMPANY_INFO, FAQS } from '../data/constants';
 import { SectionHeading } from '../components/SectionHeading';
 import { ContactSubmissionData } from '../types';
+import { submitContactMessage } from '../services/publicSubmissions';
 
 export const ContactPage: React.FC = () => {
   const [formData, setFormData] = useState<ContactSubmissionData>({
@@ -18,6 +19,7 @@ export const ContactPage: React.FC = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [submitError,setSubmitError]=useState('');
 
   const updateField = (field: keyof ContactSubmissionData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -40,15 +42,15 @@ export const ContactPage: React.FC = () => {
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
-    setIsSubmitting(true);
-    setTimeout(() => {
+    setSubmitError('');setIsSubmitting(true);
+    try { await submitContactMessage(formData);
       setIsSubmitting(false);
       setIsSubmitted(true);
-    }, 900);
+    } catch(error){setIsSubmitting(false);setSubmitError(error instanceof Error?error.message:'Your message could not be sent. Please try again.');}
   };
 
   return (
@@ -171,10 +173,10 @@ export const ContactPage: React.FC = () => {
                       <CheckCircle2 className="w-8 h-8" />
                     </div>
                     <h3 className="text-xl font-extrabold text-[#102A43]">
-                      Message Preview Complete
+                      Message Received
                     </h3>
                     <p className="text-xs sm:text-sm text-[#627D98] max-w-md mx-auto leading-relaxed">
-                      Thank you, <strong className="text-[#102A43]">{formData.fullName}</strong>. This development preview has validated your message, but it has not been sent. Please email us directly for current assistance.
+                      Thank you, <strong className="text-[#102A43]">{formData.fullName}</strong>. Your enquiry has been received.
                     </p>
                     <button
                       onClick={() => {
@@ -195,7 +197,7 @@ export const ContactPage: React.FC = () => {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
-                    <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900" role="note"><strong>Development preview:</strong> this form does not send messages yet. Please use the email address shown on this page.</p>
+                    {submitError&&<p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{submitError}</p>}
                     <div className="border-b border-[#D9E2EC] pb-3 mb-4">
                       <h3 className="text-lg font-bold text-[#102A43]">Send us a message</h3>
                       <p className="text-xs text-[#627D98]">Fill in the details below and we will get back to you.</p>

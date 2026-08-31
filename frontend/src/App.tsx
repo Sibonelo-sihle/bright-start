@@ -16,6 +16,7 @@ import { EducatorApplicationWizard } from './components/EducatorApplicationWizar
 import { SchoolStaffRequestForm } from './components/SchoolStaffRequestForm';
 import { ArrowLeft, Sparkles, School, UserCheck } from 'lucide-react';
 import { AdminApp } from './pages/admin/AdminApp';
+import { getPublishedJobBySlug } from './services/publicJobs';
 
 export default function App() {
   if (window.location.pathname.startsWith('/admin')) return <AdminApp />;
@@ -34,9 +35,10 @@ export default function App() {
     privacy: '/privacy', terms: '/terms', cookies: '/cookies',
   };
   const [currentPage, setCurrentPage] = useState<PageRoute>(() => routeToPage(window.location.pathname));
-  const [selectedJobTitle, setSelectedJobTitle] = useState<string | undefined>(undefined);
+  const [selectedJob, setSelectedJob] = useState<{id:string;title:string;slug?:string} | undefined>();
 
   const navigateTo = (page: PageRoute) => {
+    if (page === 'apply') setSelectedJob(undefined);
     setCurrentPage(page);
     const nextPath = pageToRoute[page];
     if (window.location.pathname !== nextPath) window.history.pushState({}, '', nextPath);
@@ -52,17 +54,19 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  useEffect(()=>{const slug=new URLSearchParams(window.location.search).get('job');if(currentPage==='apply'&&slug&&!selectedJob){getPublishedJobBySlug(slug).then(job=>{if(job)setSelectedJob({id:job.id,title:job.title,slug:job.slug})}).catch(()=>undefined)}},[currentPage,selectedJob]);
+
   useEffect(() => {
     const seo: Record<PageRoute, [string, string]> = {
       home: ['Bright Start Edu Recruitment | Education Recruitment', 'Education-focused recruitment support for schools and educators across Zimbabwe and the region.'],
       about: ['About Bright Start Edu Recruitment', 'Learn about Bright Start’s education recruitment focus, values, and safeguarding-conscious approach.'],
       'for-schools': ['School Staffing Support | Bright Start', 'Explore education staffing support designed for schools and learning institutions.'],
       'for-educators': ['For Educators | Bright Start', 'Explore Bright Start’s educator career support and prepare your professional profile.'],
-      jobs: ['Education Jobs | Bright Start', 'Browse clearly labelled sample education vacancy profiles and preview future job-search functionality.'],
+      jobs: ['Education Jobs | Bright Start', 'Browse current published education opportunities supported by Bright Start Edu Recruitment.'],
       process: ['Recruitment Process | Bright Start', 'Understand Bright Start’s proposed school and educator recruitment process.'],
       contact: ['Contact Bright Start Edu Recruitment', 'Contact Bright Start Edu Recruitment using the official email address or enquiry preview.'],
-      apply: ['Educator Application Preview | Bright Start', 'Prepare and validate an educator application profile using the seven-step preview.'],
-      'staff-request': ['School Staffing Request Preview | Bright Start', 'Prepare and validate a school staffing request before online delivery goes live.'],
+      apply: ['Educator Application | Bright Start', 'Submit your educator profile and private supporting documents to Bright Start.'],
+      'staff-request': ['School Staffing Request | Bright Start', 'Submit a school staffing requirement to Bright Start Edu Recruitment.'],
       privacy: ['Privacy Policy | Bright Start', 'Read the Bright Start Edu Recruitment privacy policy.'],
       terms: ['Terms and Conditions | Bright Start', 'Read the Bright Start Edu Recruitment terms and conditions.'],
       cookies: ['Cookie Policy | Bright Start', 'Read the Bright Start Edu Recruitment cookie policy.'],
@@ -72,10 +76,10 @@ export default function App() {
     document.querySelector('meta[name="description"]')?.setAttribute('content', description);
   }, [currentPage]);
 
-  const handleApplyForJob = (jobTitle: string) => {
-    setSelectedJobTitle(jobTitle);
+  const handleApplyForJob = (job: {id:string;title:string;slug?:string}) => {
+    setSelectedJob(job);
     setCurrentPage('apply');
-    window.history.pushState({}, '', '/apply');
+    window.history.pushState({}, '', `/apply${job.slug?`?job=${encodeURIComponent(job.slug)}`:''}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -111,7 +115,7 @@ export default function App() {
             </div>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <EducatorApplicationWizard
-                initialJobTitle={selectedJobTitle}
+                selectedJob={selectedJob}
                 onSuccessNavigate={() => navigateTo('home')}
               />
             </div>
