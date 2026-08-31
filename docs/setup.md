@@ -9,11 +9,11 @@ npm install
 npm run dev
 ```
 
-Vite prints the local URL after startup. Public routes and `/admin/login` are served by the same frontend application.
+Vite prints the local URL after startup. Copy `.env.example` to `.env.local` and provide the browser-safe Supabase project URL and anonymous key to exercise live public data flows.
 
 ```bash
 npm run lint
 npm run build
 ```
 
-No backend or database service is required for the current demo build.
+Supabase setup and migration instructions are documented in `supabase-setup.md`.

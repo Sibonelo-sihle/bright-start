@@ -15,11 +15,9 @@ import { TermsPage, CookiesPage } from './pages/TermsPage';
 import { EducatorApplicationWizard } from './components/EducatorApplicationWizard';
 import { SchoolStaffRequestForm } from './components/SchoolStaffRequestForm';
 import { ArrowLeft, Sparkles, School, UserCheck } from 'lucide-react';
-import { AdminApp } from './pages/admin/AdminApp';
 import { getPublishedJobBySlug } from './services/publicJobs';
 
 export default function App() {
-  if (window.location.pathname.startsWith('/admin')) return <AdminApp />;
   const routeToPage = (path: string): PageRoute => {
     if (path.startsWith('/jobs')) return 'jobs';
     const routes: Record<string, PageRoute> = {

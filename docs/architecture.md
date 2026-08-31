@@ -4,12 +4,9 @@
 Public website
       |
       v
-Future database / backend
-      ^
-      |
-Admin dashboard
+Supabase public API and Edge Function
 ```
 
-The public website and admin dashboard are one React/Vite frontend under `frontend/`. They share TypeScript domain types and frontend service abstractions.
+The public website is a React/Vite frontend under `frontend/`. It uses browser-safe Supabase configuration for published job reads and public submissions. Educator applications and private document uploads pass through the `submit-educator-application` Edge Function.
 
-The public site currently displays static sample vacancies and simulates form submissions. Admin V1 uses clearly labelled mock authentication and in-memory demo data. These are development scaffolding, not production persistence or security.
+The separate admin application integrates against the shared Supabase architecture described in `docs/admin-integration.md`; no admin runtime code is included in this repository.
