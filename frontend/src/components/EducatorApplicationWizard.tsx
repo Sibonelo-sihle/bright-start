@@ -186,7 +186,7 @@ export const EducatorApplicationWizard: React.FC<WizardProps> = ({ selectedJob, 
     }
 
     if (step === 6) {
-      if (!formData.availableStartDate.trim()) errs.availableStartDate = 'Expected start availability is required';
+      if (typeof formData.availableStartDate !== 'string' || !formData.availableStartDate.trim()) errs.availableStartDate = 'Expected start availability is required';
     }
 
     if (step === 7) {
