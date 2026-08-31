@@ -47,14 +47,16 @@ export const SchoolStaffRequestForm: React.FC<StaffRequestProps> = ({ onSuccessN
 
   const validate = (): boolean => {
     const errs: Record<string, string> = {};
-    if (!formData.schoolName.trim()) errs.schoolName = 'School / Institution name is required';
+    const schoolNameLength = formData.schoolName.trim().length;
+    if (schoolNameLength < 2 || schoolNameLength > 200) errs.schoolName = 'School / Institution name must be between 2 and 200 characters';
     if (!formData.contactPerson.trim()) errs.contactPerson = 'Contact person name is required';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) errs.email = 'Valid official email address is required';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim()) || formData.email.trim().length > 320) errs.email = 'Valid official email address is required';
     if (formData.phone.replace(/\D/g, '').length < 7) errs.phone = 'Valid phone number is required';
     if (!formData.location.trim()) errs.location = 'School location is required';
     if (!formData.roleRequired.trim()) errs.roleRequired = 'Role required is required';
-    if (!Number.isFinite(formData.numberOfPositions) || formData.numberOfPositions < 1) errs.numberOfPositions = 'Enter at least one position';
-    if (!formData.roleDescription.trim()) errs.roleDescription = 'Please provide a brief description of the role';
+    if (!Number.isFinite(formData.numberOfPositions) || formData.numberOfPositions < 1 || formData.numberOfPositions > 100) errs.numberOfPositions = 'Enter between 1 and 100 positions';
+    const roleDescriptionLength = formData.roleDescription.trim().length;
+    if (roleDescriptionLength < 10 || roleDescriptionLength > 10000) errs.roleDescription = 'Role description must be between 10 and 10,000 characters';
     if (!formData.minimumRequirements.trim()) errs.minimumRequirements = 'Minimum requirements are required';
     setErrors(errs);
     return Object.keys(errs).length === 0;
